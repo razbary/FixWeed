@@ -23,6 +23,7 @@
 	"dependencies": {
 		"@threlte/core": "^8.1.8",
 		"@threlte/extras": "^9.5.5",
+		"@vercel/kv": "^3.0.0",
 		"three": "^0.181.0"
 	}
 }

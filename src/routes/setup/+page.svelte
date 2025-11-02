@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { getRandomStrain } from '$lib/strains';
+  import { loadFromCloud, syncToCloud } from '$lib/sync';
   
   let step = 1;
   let generatedStrain = '';
@@ -12,6 +13,7 @@
   let isRecovery = false;
   let recoveryStrain = '';
   let recoveryUsername = '';
+  let isLoading = false;
   
   onMount(() => {
     const setupComplete = localStorage.getItem('fixweed_setup');
@@ -45,7 +47,7 @@
     }
   }
   
-  function setupSync() {
+  async function setupSync() {
     error = '';
     
     if (!username || username.trim().length === 0) {
@@ -61,32 +63,43 @@
     localStorage.setItem('fixweed_setup', 'encrypted');
     localStorage.setItem('fixweed_key', generatedStrain);
     localStorage.setItem('fixweed_username', username.trim());
+    
+    await syncToCloud(username.trim(), generatedStrain);
+    
     goto('/profile');
   }
   
-  function recoverData() {
+  async function recoverData() {
     error = '';
+    isLoading = true;
     
     if (!recoveryUsername || recoveryUsername.trim().length === 0) {
       error = 'PLEASE ENTER YOUR USERNAME';
+      isLoading = false;
       return;
     }
     
     if (!recoveryStrain || recoveryStrain.trim().length === 0) {
       error = 'PLEASE ENTER YOUR STRAIN NAME';
+      isLoading = false;
       return;
     }
     
-    // TODO: Actually fetch encrypted data from server using recoveryStrain as key
-    // For now, just set up the key and username
     localStorage.setItem('fixweed_setup', 'encrypted');
     localStorage.setItem('fixweed_key', recoveryStrain.trim());
     localStorage.setItem('fixweed_username', recoveryUsername.trim());
     
-    // Check if they already have a profile
+    const loaded = await loadFromCloud(recoveryUsername.trim(), recoveryStrain.trim());
+    
+    isLoading = false;
+    
+    if (!loaded) {
+      error = 'RECOVERY FAILED - CHECK USERNAME & STRAIN';
+      return;
+    }
+    
     const existingProfile = localStorage.getItem('fixweed_profile');
     if (existingProfile) {
-      alert(`Welcome back, ${recoveryUsername.trim()}! Your data has been loaded.`);
       goto('/track');
     } else {
       goto('/profile');
@@ -193,8 +206,8 @@
               <div class="error">{error}</div>
             {/if}
             
-            <button on:click={recoverData} class="option-btn">
-              RECOVER DATA
+            <button on:click={recoverData} class="option-btn" disabled={isLoading}>
+              {isLoading ? 'LOADING...' : 'RECOVER DATA'}
             </button>
             
             <button on:click={() => step = 1} class="back-btn">

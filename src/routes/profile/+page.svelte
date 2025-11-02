@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { syncToCloud } from '$lib/sync';
   
   let smokingDuration = '';
   let smokingUnit = 'years';
@@ -58,7 +59,7 @@
     }
   });
   
-  function saveProfile() {
+  async function saveProfile() {
     error = '';
     
     // Validate at least some fields are filled
@@ -79,12 +80,32 @@
     };
     
     localStorage.setItem('fixweed_profile', JSON.stringify(profile));
+    
+    const setup = localStorage.getItem('fixweed_setup');
+    if (setup === 'encrypted') {
+      const username = localStorage.getItem('fixweed_username');
+      const key = localStorage.getItem('fixweed_key');
+      if (username && key) {
+        await syncToCloud(username, key);
+      }
+    }
+    
     goto('/track');
   }
   
-  function skip() {
+  async function skip() {
     // Save empty profile so they don't see this again
     localStorage.setItem('fixweed_profile', JSON.stringify({ skipped: true }));
+    
+    const setup = localStorage.getItem('fixweed_setup');
+    if (setup === 'encrypted') {
+      const username = localStorage.getItem('fixweed_username');
+      const key = localStorage.getItem('fixweed_key');
+      if (username && key) {
+        await syncToCloud(username, key);
+      }
+    }
+    
     goto('/track');
   }
 </script>

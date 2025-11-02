@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { getRandomStrain } from '$lib/strains';
+  import { syncToCloud } from '$lib/sync';
   
   let generatedStrain = '';
   let userConfirmation = '';
@@ -20,7 +21,7 @@
     goto('/track');
   }
   
-  function enableSync() {
+  async function enableSync() {
     error = '';
     
     if (!username || username.trim().length === 0) {
@@ -37,7 +38,8 @@
     localStorage.setItem('fixweed_key', generatedStrain);
     localStorage.setItem('fixweed_username', username.trim());
     
-    // Check if they already have a profile
+    await syncToCloud(username.trim(), generatedStrain);
+    
     const existingProfile = localStorage.getItem('fixweed_profile');
     if (existingProfile) {
       goto('/track');
