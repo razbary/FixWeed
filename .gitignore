@@ -41,6 +41,6 @@ coverage/
 tmp/
 temp/
 
-# Cursor AI (local only)
-.cursor*
+# Local config
+.cu*
 
