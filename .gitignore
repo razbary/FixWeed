@@ -41,6 +41,6 @@ coverage/
 tmp/
 temp/
 
-# Cursor AI rules (local only)
-.cursorrules
+# Cursor AI (local only)
+.cursor*
 
