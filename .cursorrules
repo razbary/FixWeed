@@ -13,7 +13,31 @@
 - All user state must be client-side only
 
 ## Code Standards
-- 
+- **Consistent Styling**: Check existing components/elements before creating new ones to maintain visual consistency across the app. Match established patterns unless explicitly asked to deviate.
+
+## Design Standards
+- **Brutalist Aesthetic**: Embrace "inefficient" but unique, cool designs—the site itself is an art statement
+- **Avoid Generic AI Aesthetics**: No default LLM style suggestions (glitch/hacker, neon/cyberpunk, gradient blobs, etc.)
+- **Niche Inspirations**: Draw from underground web design, 2000s aesthetics, winamp themes, brutalist
+- **Uniqueness Over Efficiency**: Prioritize distinctive visual experiences over conventional UX patterns
+- **Small/Inspired Sources**: Reference smaller, more experimental web design rather than mainstream trends
+- **Break Convention**: Use shapes/objects for unrelated purposes, challenge typical web design rules when it serves the aesthetic 
+
+## Design Idea Bank (draw from as needed, not required)
+- Asymmetry, off-center layouts, raw HTML feel
+- Retro web artifacts: visible compression, JPEG artifacts, digital imperfections
+- Stacked/overlapping panels instead of unified containers
+- Beveled buttons, inset effects, physically-depressed elements
+- Metallic/chrome/translucent surfaces with glossy textures
+- Non-standard navigation patterns
+- Heavy borders, deep shadows, inset panels
+- Limited high-saturation accent colors for active states
+- Condensed sans-serif (ALL CAPS) + monospace typography mix
+- Instant color transitions (no smooth animations)
+- Digital noise/grain filters, text marquees
+- "Crunchy" high-contrast blur effects
+- Custom chunky scrollbars as design elements
+- Visible grid textures, intentional clutter 
 
 ## Prohibited Actions
 - Storing user data on the server
