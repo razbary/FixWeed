@@ -1,0 +1,30 @@
+# FixWeed Project Rules
+
+## Core Principles
+- **Complete User Anonymity**: No user data stored server-side, nothing exposed to the host
+- **Zero Tracking**: No analytics, cookies, or tracking of any kind
+- **Client-Side First**: All user progress/data stored locally (localStorage, IndexedDB)
+- **Privacy by Design**: If cloud sync is needed, use client-side encryption where user controls the key
+
+## Architecture Restrictions
+- No server-side user databases
+- No session tracking or cookies
+- No analytics or telemetry services
+- All user state must be client-side only
+
+## Code Standards
+- 
+
+## Prohibited Actions
+- Storing user data on the server
+- Exposing user information to the host
+- Implementing analytics or tracking
+- Using third-party services that collect user data
+
+## Required Patterns
+- Client-side storage for all user progress (localStorage/IndexedDB)
+- If sync is needed: client-side encryption with user-controlled keys
+
+## Workflow Preferences
+- 
+
