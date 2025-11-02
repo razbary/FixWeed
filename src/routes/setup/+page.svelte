@@ -1,26 +1,46 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { getRandomStrain } from '$lib/strains';
   
   let step = 1;
-  let passphrase = '';
-  let confirmPassphrase = '';
+  let generatedStrain = '';
+  let userConfirmation = '';
+  let username = '';
   let error = '';
+  let isReturningUser = false;
+  let isRecovery = false;
+  let recoveryStrain = '';
+  let recoveryUsername = '';
   
   onMount(() => {
     const setupComplete = localStorage.getItem('fixweed_setup');
-    if (setupComplete) {
+    if (setupComplete === 'encrypted') {
+      // User already has sync, go to track
       goto('/track');
+    } else if (setupComplete === 'local_only') {
+      isReturningUser = true;
+      // Show returning user the option to enable sync
     }
+    // If no setup, show new user flow
   });
   
   function skipSync() {
     localStorage.setItem('fixweed_setup', 'local_only');
-    goto('/track');
+    goto('/profile');
   }
   
-  function nextStep() {
+  function nextStepGenerate() {
     if (step === 1) {
+      isRecovery = false;
+      generatedStrain = getRandomStrain();
+      step = 2;
+    }
+  }
+  
+  function nextStepRecover() {
+    if (step === 1) {
+      isRecovery = true;
       step = 2;
     }
   }
@@ -28,19 +48,55 @@
   function setupSync() {
     error = '';
     
-    if (!passphrase || passphrase.length < 8) {
-      error = 'PASSPHRASE MUST BE AT LEAST 8 CHARACTERS';
+    if (!username || username.trim().length === 0) {
+      error = 'PLEASE ENTER A USERNAME';
       return;
     }
     
-    if (passphrase !== confirmPassphrase) {
-      error = 'PASSPHRASES DO NOT MATCH';
+    if (userConfirmation.toLowerCase().trim() !== generatedStrain.toLowerCase().trim()) {
+      error = 'STRAIN NAME DOES NOT MATCH';
       return;
     }
     
     localStorage.setItem('fixweed_setup', 'encrypted');
-    localStorage.setItem('fixweed_key', passphrase);
-    goto('/track');
+    localStorage.setItem('fixweed_key', generatedStrain);
+    localStorage.setItem('fixweed_username', username.trim());
+    goto('/profile');
+  }
+  
+  function recoverData() {
+    error = '';
+    
+    if (!recoveryUsername || recoveryUsername.trim().length === 0) {
+      error = 'PLEASE ENTER YOUR USERNAME';
+      return;
+    }
+    
+    if (!recoveryStrain || recoveryStrain.trim().length === 0) {
+      error = 'PLEASE ENTER YOUR STRAIN NAME';
+      return;
+    }
+    
+    // TODO: Actually fetch encrypted data from server using recoveryStrain as key
+    // For now, just set up the key and username
+    localStorage.setItem('fixweed_setup', 'encrypted');
+    localStorage.setItem('fixweed_key', recoveryStrain.trim());
+    localStorage.setItem('fixweed_username', recoveryUsername.trim());
+    
+    // Check if they already have a profile
+    const existingProfile = localStorage.getItem('fixweed_profile');
+    if (existingProfile) {
+      alert(`Welcome back, ${recoveryUsername.trim()}! Your data has been loaded.`);
+      goto('/track');
+    } else {
+      goto('/profile');
+    }
+  }
+  
+  function changeStrain() {
+    generatedStrain = getRandomStrain();
+    userConfirmation = '';
+    error = '';
   }
 </script>
 
@@ -56,77 +112,150 @@
   <div class="container">
     {#if step === 1}
       <div class="step">
-        <h1>STORAGE</h1>
+        <h1>{isReturningUser ? 'STORAGE OPTIONS' : 'STORAGE'}</h1>
         
-        <div class="info-box">
-          <p class="info-title">LOCAL ONLY</p>
-          <p class="info-desc">
-            Data stored only on this device.<br>
-            Cannot sync across devices.<br>
-            100% private.
+        {#if isReturningUser}
+          <p class="info-desc" style="margin-bottom: 20px; color: #999;">
+            Existing data found. Choose storage method:
           </p>
-          <button on:click={skipSync} class="option-btn">
-            USE LOCAL STORAGE
+        {/if}
+        
+        <div class="info-box compact">
+          <p class="info-title">{isReturningUser ? 'SYNC' : 'NEW SYNC'}</p>
+          <p class="info-desc">
+            Create new encrypted account
+          </p>
+          <button on:click={nextStepGenerate} class="option-btn">
+            {isReturningUser ? 'ENABLE SYNC' : 'GENERATE STRAIN'}
           </button>
         </div>
         
         <div class="divider">OR</div>
         
-        <div class="info-box">
-          <p class="info-title">ENCRYPTED SYNC</p>
+        <div class="info-box compact">
+          <p class="info-title">RESTORE FROM SYNC</p>
           <p class="info-desc">
-            Data encrypted with YOUR passphrase.<br>
-            Sync across devices.<br>
-            Server cannot read your data.
+            Load existing synced data
           </p>
-          <button on:click={nextStep} class="option-btn secondary">
-            SETUP SYNC
+          <button on:click={nextStepRecover} class="option-btn">
+            ENTER STRAIN
+          </button>
+        </div>
+        
+        <div class="divider">OR</div>
+        
+        <div class="info-box compact warning">
+          <p class="info-title">{isReturningUser ? 'LOCAL ONLY' : 'LOCAL ONLY'}</p>
+          <p class="info-desc">
+            This device only · Can be inconsistent · Not recommended
+          </p>
+          <p class="info-desc" style="margin-top: 10px; font-size: 0.75rem; color: #777;">
+            If concerned about data saved in any database: this option is 100% isolated, nothing stored on servers.
+          </p>
+          <button on:click={skipSync} class="option-btn secondary">
+            {isReturningUser ? 'KEEP LOCAL' : 'USE LOCAL'}
           </button>
         </div>
       </div>
     {:else}
       <div class="step">
-        <h1>PASSPHRASE</h1>
-        
-        <div class="info-box">
-          <p class="info-desc">
-            Create a passphrase to encrypt your data.<br>
-            <strong>DO NOT LOSE THIS.</strong><br>
-            We cannot recover it.
-          </p>
+        {#if isRecovery}
+          <h1>RECOVER DATA</h1>
           
-          <div class="input-group">
-            <label for="pass">PASSPHRASE</label>
-            <input 
-              id="pass"
-              type="password" 
-              bind:value={passphrase}
-              placeholder="minimum 8 characters"
-            />
+          <div class="info-box">
+            <p class="info-desc">
+              Enter your details to recover your data.
+            </p>
+            
+            <div class="input-group">
+              <label for="recovery-name">USERNAME</label>
+              <input 
+                id="recovery-name"
+                type="text" 
+                bind:value={recoveryUsername}
+                placeholder="enter your username"
+                autocomplete="off"
+              />
+            </div>
+            
+            <div class="input-group">
+              <label for="recovery">YOUR STRAIN NAME</label>
+              <input 
+                id="recovery"
+                type="text" 
+                bind:value={recoveryStrain}
+                placeholder="enter your strain name"
+                autocomplete="off"
+              />
+            </div>
+            
+            {#if error}
+              <div class="error">{error}</div>
+            {/if}
+            
+            <button on:click={recoverData} class="option-btn">
+              RECOVER DATA
+            </button>
+            
+            <button on:click={() => step = 1} class="back-btn">
+              ← BACK
+            </button>
           </div>
+        {:else}
+          <h1>YOUR SYNC KEY</h1>
           
-          <div class="input-group">
-            <label for="confirm">CONFIRM PASSPHRASE</label>
-            <input 
-              id="confirm"
-              type="password" 
-              bind:value={confirmPassphrase}
-              placeholder="type it again"
-            />
+          <div class="info-box">
+            <p class="info-desc">
+              Choose a username and save your strain key.
+            </p>
+            
+            <div class="input-group">
+              <label for="username">USERNAME</label>
+              <input 
+                id="username"
+                type="text" 
+                bind:value={username}
+                placeholder="choose a username"
+                autocomplete="off"
+              />
+            </div>
+            
+            <div class="strain-display">
+              <div class="strain-label">YOUR STRAIN</div>
+              <div class="strain-name">{generatedStrain}</div>
+              <button on:click={changeStrain} class="change-strain-btn">
+                ⟳ CHANGE STRAIN
+              </button>
+            </div>
+            
+            <p class="info-desc" style="margin-top: 15px; margin-bottom: 8px;">
+              <strong>SAVE THIS STRAIN. WE CANNOT RECOVER IT.</strong>
+            </p>
+            
+            <div class="input-group">
+              <label for="confirm">CONFIRM STRAIN</label>
+              <input 
+                id="confirm"
+                type="text" 
+                bind:value={userConfirmation}
+                placeholder="type the strain name"
+                autocomplete="off"
+              />
+            </div>
+            
+            {#if error}
+              <div class="error">{error}</div>
+            {/if}
+            
+            <button on:click={setupSync} class="option-btn">
+              CONFIRM & ENABLE SYNC
+            </button>
+            
+            <button on:click={() => step = 1} class="back-btn">
+              ← BACK
+            </button>
           </div>
-          
-          {#if error}
-            <div class="error">{error}</div>
-          {/if}
-          
-          <button on:click={setupSync} class="option-btn">
-            ENCRYPT & CONTINUE
-          </button>
-          
-          <button on:click={() => step = 1} class="back-btn">
-            ← BACK
-          </button>
-        </div>
+        {/if}
       </div>
     {/if}
   </div>
@@ -175,16 +304,16 @@
   }
   
   .container {
-    padding: 40px 20px;
+    padding: 30px 20px;
     max-width: 500px;
     margin: 0 auto;
   }
   
   h1 {
     font-family: 'Arial Black', sans-serif;
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: #fff;
-    margin: 0 0 40px 0;
+    margin: 0 0 25px 0;
     letter-spacing: -0.02em;
   }
   
@@ -196,19 +325,37 @@
     box-shadow: inset 0 0 0 2px #000;
   }
   
+  .info-box.compact {
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  
+  .info-box.warning {
+    border-color: #444;
+    opacity: 0.7;
+  }
+  
+  .info-box.warning .info-title {
+    color: #888;
+  }
+  
+  .info-box.warning .info-desc {
+    color: #666;
+  }
+  
   .info-title {
     font-family: 'Arial Black', sans-serif;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #00ff00;
-    margin: 0 0 15px 0;
+    margin: 0 0 8px 0;
     letter-spacing: 0.05em;
   }
   
   .info-desc {
-    font-size: 0.9rem;
-    line-height: 1.6;
+    font-size: 0.8rem;
+    line-height: 1.4;
     color: #999;
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
   }
   
   .info-desc strong {
@@ -217,9 +364,9 @@
   
   .divider {
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #666;
-    margin: 30px 0;
+    margin: 15px 0;
     letter-spacing: 0.3em;
   }
   
@@ -227,9 +374,9 @@
     width: 100%;
     background: #fff;
     border: none;
-    padding: 18px;
+    padding: 15px;
     font-family: 'Arial Black', sans-serif;
-    font-size: 1.1rem;
+    font-size: 1rem;
     letter-spacing: 0.05em;
     cursor: pointer;
     box-shadow: 
@@ -252,6 +399,75 @@
   }
   
   .option-btn.secondary:active {
+    background: #00ff00;
+    color: #000;
+  }
+  
+  .option-btn-small {
+    width: 100%;
+    background: transparent;
+    border: 1px solid #444;
+    color: #666;
+    padding: 10px;
+    margin-top: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+  }
+  
+  .option-btn-small:hover {
+    border-color: #fff;
+    color: #fff;
+  }
+  
+  .option-btn-small:active {
+    background: rgba(255,255,255,0.1);
+  }
+  
+  .strain-display {
+    background: #000;
+    border: 4px solid #00ff00;
+    padding: 25px;
+    text-align: center;
+    margin: 20px 0;
+    box-shadow: 
+      inset 0 0 0 2px #000,
+      0 0 20px rgba(0,255,0,0.3);
+  }
+  
+  .strain-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: #00ff00;
+    margin-bottom: 10px;
+  }
+  
+  .strain-name {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 2rem;
+    color: #fff;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+  }
+  
+  .change-strain-btn {
+    background: transparent;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 8px 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+  }
+  
+  .change-strain-btn:hover {
+    background: rgba(0,255,0,0.1);
+  }
+  
+  .change-strain-btn:active {
     background: #00ff00;
     color: #000;
   }

@@ -1,9 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import { getRandomStrain } from '$lib/strains';
   
-  let passphrase = '';
-  let confirmPassphrase = '';
+  let generatedStrain = '';
+  let userConfirmation = '';
+  let username = '';
   let error = '';
   
   onMount(() => {
@@ -11,6 +13,7 @@
     if (!setupComplete || setupComplete === 'encrypted') {
       goto('/track');
     }
+    generatedStrain = getRandomStrain();
   });
   
   function cancel() {
@@ -20,19 +23,33 @@
   function enableSync() {
     error = '';
     
-    if (!passphrase || passphrase.length < 8) {
-      error = 'PASSPHRASE MUST BE AT LEAST 8 CHARACTERS';
+    if (!username || username.trim().length === 0) {
+      error = 'PLEASE ENTER A USERNAME';
       return;
     }
     
-    if (passphrase !== confirmPassphrase) {
-      error = 'PASSPHRASES DO NOT MATCH';
+    if (userConfirmation.toLowerCase().trim() !== generatedStrain.toLowerCase().trim()) {
+      error = 'STRAIN NAME DOES NOT MATCH';
       return;
     }
     
     localStorage.setItem('fixweed_setup', 'encrypted');
-    localStorage.setItem('fixweed_key', passphrase);
-    goto('/track');
+    localStorage.setItem('fixweed_key', generatedStrain);
+    localStorage.setItem('fixweed_username', username.trim());
+    
+    // Check if they already have a profile
+    const existingProfile = localStorage.getItem('fixweed_profile');
+    if (existingProfile) {
+      goto('/track');
+    } else {
+      goto('/profile');
+    }
+  }
+  
+  function changeStrain() {
+    generatedStrain = getRandomStrain();
+    userConfirmation = '';
+    error = '';
   }
 </script>
 
@@ -45,30 +62,42 @@
     <h1>ENABLE SYNC</h1>
     
     <div class="info-box">
-      <p class="info-title">UPGRADE TO ENCRYPTED SYNC</p>
+      <p class="info-title">YOUR SYNC KEY</p>
       <p class="info-desc">
-        Your existing data will be encrypted and can sync across devices.<br>
-        <strong>Create a passphrase to continue.</strong><br>
-        Do not lose this passphrase.
+        Choose a username and save your strain key. Your existing data will be encrypted.
       </p>
       
       <div class="input-group">
-        <label for="pass">PASSPHRASE</label>
+        <label for="username">USERNAME</label>
         <input 
-          id="pass"
-          type="password" 
-          bind:value={passphrase}
-          placeholder="minimum 8 characters"
+          id="username"
+          type="text" 
+          bind:value={username}
+          placeholder="choose a username"
+          autocomplete="off"
         />
       </div>
       
+      <div class="strain-display">
+        <div class="strain-label">YOUR STRAIN</div>
+        <div class="strain-name">{generatedStrain}</div>
+        <button on:click={changeStrain} class="change-strain-btn">
+          ⟳ CHANGE STRAIN
+        </button>
+      </div>
+      
+      <p class="info-desc" style="margin-top: 15px; margin-bottom: 8px;">
+        <strong>SAVE THIS STRAIN. WE CANNOT RECOVER IT.</strong>
+      </p>
+      
       <div class="input-group">
-        <label for="confirm">CONFIRM PASSPHRASE</label>
+        <label for="confirm">CONFIRM STRAIN</label>
         <input 
           id="confirm"
-          type="password" 
-          bind:value={confirmPassphrase}
-          placeholder="type it again"
+          type="text" 
+          bind:value={userConfirmation}
+          placeholder="type the strain name"
+          autocomplete="off"
         />
       </div>
       
@@ -77,7 +106,7 @@
       {/if}
       
       <button on:click={enableSync} class="option-btn">
-        ENABLE SYNC
+        CONFIRM & ENABLE SYNC
       </button>
       
       <button on:click={cancel} class="cancel-btn">
@@ -158,6 +187,53 @@
   
   .info-desc strong {
     color: #fff;
+  }
+  
+  .strain-display {
+    background: #000;
+    border: 4px solid #00ff00;
+    padding: 25px;
+    text-align: center;
+    margin: 20px 0;
+    box-shadow: 
+      inset 0 0 0 2px #000,
+      0 0 20px rgba(0,255,0,0.3);
+  }
+  
+  .strain-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: #00ff00;
+    margin-bottom: 10px;
+  }
+  
+  .strain-name {
+    font-family: 'Arial Black', sans-serif;
+    font-size: 2rem;
+    color: #fff;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+  }
+  
+  .change-strain-btn {
+    background: transparent;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 8px 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+  }
+  
+  .change-strain-btn:hover {
+    background: rgba(0,255,0,0.1);
+  }
+  
+  .change-strain-btn:active {
+    background: #00ff00;
+    color: #000;
   }
   
   .input-group {

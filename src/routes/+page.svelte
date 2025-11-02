@@ -2,15 +2,31 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   
+  let hasExistingData = false;
+  
   onMount(() => {
     const setupComplete = localStorage.getItem('fixweed_setup');
-    if (setupComplete) {
-      goto('/track');
-    }
+    hasExistingData = !!setupComplete;
   });
   
   function handleStart() {
-    goto('/setup');
+    const setupComplete = localStorage.getItem('fixweed_setup');
+    
+    if (setupComplete === 'encrypted') {
+      // User already has sync enabled, go straight to track
+      goto('/track');
+    } else {
+      // New user or local-only user, go to setup
+      // Setup page will show appropriate options
+      goto('/setup');
+    }
+  }
+  
+  function startFresh() {
+    if (confirm('Are you sure? This will delete all your data and cannot be undone.')) {
+      localStorage.clear();
+      hasExistingData = false;
+    }
   }
 </script>
 
@@ -48,13 +64,19 @@
     
     <div class="cta-section">
       <button on:click={handleStart} class="start-btn">
-        <span class="btn-text">TAKE CONTROL</span>
+        <span class="btn-text">{hasExistingData ? 'CONTINUE' : 'TAKE CONTROL'}</span>
         <span class="btn-arrow">→</span>
       </button>
       
+      {#if hasExistingData}
+        <button on:click={startFresh} class="fresh-btn">
+          START FRESH
+        </button>
+      {/if}
+      
       <p class="disclaimer">
-        ALL DATA STORED LOCALLY ON YOUR DEVICE<br>
-        NOTHING SENT TO SERVER · NO COOKIES · NO ANALYTICS
+        NO COOKIES · NO ANALYTICS · NO TRACKING<br>
+        DATA STORED LOCALLY OR ENCRYPTED ON YOUR TERMS
       </p>
     </div>
   </div>
@@ -194,6 +216,30 @@
     font-size: 2.5rem;
     line-height: 1;
     color: #000;
+  }
+  
+  .fresh-btn {
+    width: 100%;
+    background: transparent;
+    border: 2px solid #333;
+    color: #666;
+    padding: 15px;
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+  }
+  
+  .fresh-btn:hover {
+    border-color: #ff0000;
+    color: #ff0000;
+  }
+  
+  .fresh-btn:active {
+    background: #ff0000;
+    color: #fff;
+    border-color: #ff0000;
   }
   
   .disclaimer {
