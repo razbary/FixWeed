@@ -387,7 +387,7 @@
     width: 100%;
     background: #fff;
     border: none;
-    padding: 15px;
+    padding: 16px 15px;
     font-family: 'Arial Black', sans-serif;
     font-size: 1rem;
     letter-spacing: 0.05em;
@@ -396,6 +396,7 @@
       inset -4px -4px 0 rgba(0,0,0,0.2),
       inset 4px 4px 0 rgba(255,255,255,0.8);
     color: #000;
+    min-height: 44px;
   }
   
   .option-btn:active {
@@ -507,6 +508,7 @@
     font-size: 1rem;
     box-shadow: inset 0 0 0 2px #000;
     box-sizing: border-box;
+    min-height: 44px;
   }
   
   input::placeholder {
@@ -542,6 +544,72 @@
   
   .back-btn:hover {
     color: #999;
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      padding: 40px;
+      max-width: 600px;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 30px;
+    }
+    
+    .info-box {
+      padding: 30px;
+    }
+    
+    .info-title {
+      font-size: 1.2rem;
+    }
+    
+    .info-desc {
+      font-size: 0.85rem;
+    }
+    
+    .option-btn {
+      padding: 18px;
+      font-size: 1.1rem;
+    }
+    
+    .strain-name {
+      font-size: 2.2rem;
+    }
+    
+    input {
+      padding: 18px;
+      font-size: 1.1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.6rem;
+    }
+    
+    .info-box {
+      padding: 18px 15px;
+      border-width: 4px;
+    }
+    
+    .info-box.compact {
+      padding: 15px;
+    }
+    
+    .strain-name {
+      font-size: 1.5rem;
+    }
+    
+    .option-btn {
+      font-size: 0.9rem;
+    }
+    
+    input {
+      padding: 12px;
+      font-size: 0.9rem;
+    }
   }
 </style>
 

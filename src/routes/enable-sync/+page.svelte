@@ -260,6 +260,7 @@
     font-size: 1rem;
     box-shadow: inset 0 0 0 2px #000;
     box-sizing: border-box;
+    min-height: 44px;
   }
   
   input::placeholder {
@@ -295,6 +296,7 @@
       inset 4px 4px 0 rgba(255,255,255,0.8);
     color: #000;
     margin-bottom: 15px;
+    min-height: 44px;
   }
   
   .option-btn:active {
@@ -318,6 +320,82 @@
   
   .cancel-btn:hover {
     color: #999;
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      padding: 50px 40px;
+      max-width: 600px;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 50px;
+    }
+    
+    .info-box {
+      padding: 35px;
+    }
+    
+    .info-title {
+      font-size: 1.4rem;
+    }
+    
+    .info-desc {
+      font-size: 1rem;
+    }
+    
+    .strain-name {
+      font-size: 2.4rem;
+    }
+    
+    input {
+      padding: 18px;
+      font-size: 1.1rem;
+    }
+    
+    .option-btn {
+      padding: 20px;
+      font-size: 1.2rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .container {
+      padding: 30px 15px;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+    }
+    
+    .info-box {
+      padding: 18px 15px;
+      border-width: 4px;
+    }
+    
+    .info-title {
+      font-size: 1rem;
+    }
+    
+    .info-desc {
+      font-size: 0.8rem;
+    }
+    
+    .strain-name {
+      font-size: 1.5rem;
+    }
+    
+    .option-btn {
+      padding: 16px;
+      font-size: 1rem;
+    }
+    
+    input {
+      padding: 12px;
+      font-size: 0.9rem;
+    }
   }
 </style>
 

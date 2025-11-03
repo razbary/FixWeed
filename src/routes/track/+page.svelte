@@ -103,6 +103,9 @@
     {#if insights.length > 0}
       <div class="title-block">
         <h1>FIX<br>WEED</h1>
+        <div class="blurb">
+          quit on your timeline.<br>no rules, no shame.<br>just honest tracking.
+        </div>
       </div>
       
       <div class="insights-panel">
@@ -282,6 +285,14 @@
     margin-bottom: 30px;
   }
   
+  .blurb {
+    font-size: 0.75rem;
+    color: #999;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    margin-top: 15px;
+  }
+  
   h1 {
     font-size: 2.5rem;
     font-weight: 900;
@@ -409,6 +420,19 @@
       );
   }
   
+  @media (min-width: 600px) {
+    .title-block {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+    
+    .blurb {
+      margin-top: 0;
+      flex: 1;
+    }
+  }
+  
   @media (min-width: 768px) {
     .content {
       padding: 100px 40px 60px;
@@ -420,6 +444,11 @@
     
     .title-block {
       padding: 25px 35px;
+      gap: 30px;
+    }
+    
+    .blurb {
+      font-size: 0.85rem;
     }
     
     .insights-panel {

@@ -3,10 +3,14 @@
   import { onMount } from 'svelte';
   
   let hasExistingData = false;
+  let username = '';
   
   onMount(() => {
     const setupComplete = localStorage.getItem('fixweed_setup');
     hasExistingData = !!setupComplete;
+    if (hasExistingData) {
+      username = localStorage.getItem('fixweed_username') || '';
+    }
   });
   
   function handleStart() {
@@ -39,8 +43,8 @@
     
     <div class="message-block">
       <p class="statement">
+        YOUR WEED.<br>
         YOUR USAGE.<br>
-        YOUR DATA.<br>
         YOUR TERMS.
       </p>
     </div>
@@ -64,7 +68,7 @@
     
     <div class="cta-section">
       <button on:click={handleStart} class="start-btn">
-        <span class="btn-text">{hasExistingData ? 'CONTINUE' : 'TAKE CONTROL'}</span>
+        <span class="btn-text">{hasExistingData ? (username ? `CONTINUE (${username})` : 'CONTINUE') : 'TAKE CONTROL'}</span>
         <span class="btn-arrow">→</span>
       </button>
       
@@ -196,6 +200,7 @@
       inset -5px -5px 0 rgba(0,0,0,0.2),
       inset 5px 5px 0 rgba(255,255,255,0.8);
     margin-bottom: 20px;
+    min-height: 44px;
   }
   
   .start-btn:active {
@@ -251,9 +256,60 @@
     margin: 0;
   }
   
+  @media (max-width: 480px) {
+    h1 {
+      font-size: clamp(3rem, 12vw, 4rem);
+    }
+    
+    .message-block {
+      padding: 20px 18px;
+      border-width: 6px;
+    }
+    
+    .statement {
+      font-size: 1.2rem;
+    }
+    
+    .info-panels {
+      gap: 10px;
+    }
+    
+    .panel {
+      padding: 15px 8px;
+    }
+    
+    .panel-num {
+      font-size: 1.5rem;
+    }
+    
+    .start-btn {
+      padding: 20px 25px;
+    }
+    
+    .btn-text {
+      font-size: 1.3rem;
+    }
+    
+    .btn-arrow {
+      font-size: 2rem;
+    }
+  }
+  
   @media (min-width: 768px) {
     .container {
       max-width: 600px;
+    }
+    
+    .message-block {
+      padding: 35px 30px;
+    }
+    
+    .statement {
+      font-size: 1.7rem;
+    }
+    
+    .panel {
+      padding: 25px 15px;
     }
   }
 </style>

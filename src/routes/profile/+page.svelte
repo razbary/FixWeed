@@ -55,7 +55,7 @@
     // Check if profile already exists
     const existingProfile = localStorage.getItem('fixweed_profile');
     if (existingProfile) {
-      goto('/track');
+      goto('/welcome');
     }
   });
   
@@ -90,7 +90,7 @@
       }
     }
     
-    goto('/track');
+    goto('/welcome');
   }
   
   async function skip() {
@@ -106,7 +106,7 @@
       }
     }
     
-    goto('/track');
+    goto('/welcome');
   }
 </script>
 
@@ -315,12 +315,13 @@
     background: #000;
     border: 3px solid #fff;
     color: #fff;
-    padding: 10px;
+    padding: 12px 10px;
     font-family: 'Courier New', monospace;
     font-size: 0.85rem;
     box-shadow: inset 0 0 0 2px #000;
     box-sizing: border-box;
     cursor: pointer;
+    min-height: 44px;
   }
   
   select:focus {
@@ -355,7 +356,7 @@
     width: 100%;
     background: #fff;
     border: none;
-    padding: 15px;
+    padding: 16px 15px;
     font-family: 'Arial Black', sans-serif;
     font-size: 1rem;
     letter-spacing: 0.05em;
@@ -365,6 +366,7 @@
       inset 4px 4px 0 rgba(255,255,255,0.8);
     color: #000;
     margin: 16px 0 10px 0;
+    min-height: 44px;
   }
   
   .save-btn:active {
@@ -388,6 +390,54 @@
   
   .skip-btn:hover {
     color: #999;
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      padding: 30px 40px;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    
+    .info-desc {
+      font-size: 0.9rem;
+      margin-bottom: 25px;
+    }
+    
+    .form {
+      padding: 30px 25px;
+    }
+    
+    label {
+      font-size: 0.75rem;
+    }
+    
+    select {
+      padding: 12px;
+      font-size: 0.9rem;
+    }
+    
+    .save-btn {
+      padding: 18px;
+      font-size: 1.1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.5rem;
+    }
+    
+    .form {
+      padding: 15px;
+    }
+    
+    select {
+      font-size: 0.8rem;
+    }
   }
 </style>
 
